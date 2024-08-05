@@ -1,22 +1,25 @@
-// ***
-// *** You MUST modify this file
-// ***
-
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <stdbool.h>
 #include "tree.h"
 
 // DO NOT MODIFY FROM HERE --->>>
+Tree * newTree(void)
+{
+  Tree * t = malloc(sizeof(Tree));
+  t->root = NULL;
+  return t;
+}
+
 void deleteTreeNode(TreeNode * tr)
 {
   if (tr == NULL)
     {
       return;
     }
-  deleteTreeNode (tr -> left);
-  deleteTreeNode (tr -> right);
-  free (tr);
+  deleteTreeNode(tr->left);
+  deleteTreeNode(tr->right);
+  free(tr);
 }
 
 void freeTree(Tree * tr)
@@ -26,75 +29,99 @@ void freeTree(Tree * tr)
       // nothing to delete
       return;
     }
-  deleteTreeNode (tr -> root);
-  free (tr);
+  deleteTreeNode(tr->root);
+  free(tr);
 }
 
-static void preOrderNode(TreeNode * tn, FILE * fptr)
-{
-  if (tn == NULL)
-    {
-      return;
-    }
-  fprintf(fptr, "%d\n", tn -> value);
-  preOrderNode(tn -> left, fptr);
-  preOrderNode(tn -> right, fptr);
-}
-
-void preOrder(Tree * tr, char * filename)
-{
-  if (tr == NULL)
-    {
-      return;
-    }
-  FILE * fptr = fopen(filename, "w");
-  preOrderNode(tr -> root, fptr);
-  fclose (fptr);
-}
 // <<<--- UNTIL HERE
 
 // ***
-// *** You MUST modify the follow function
+// *** You MUST modify the following functions
 // ***
 
-// Consider the algorithm posted on
-// https://www.geeksforgeeks.org/construct-a-binary-tree-from-postorder-and-inorder/
+// You ARE allowed to create any helper functions needed
+// for either of the following functions
 
-TreeNode* buildTreeHelper(int* inArray, int* postArray, int inStart, int inEnd, int postStart, int postEnd) {
-    // Base case: if indices are invalid or there are no elements in the subtree
-    if (inStart > inEnd || postStart > postEnd) {
-        return NULL;
-    }
-
-    // Create a new node with the value from the last element of the postorder array
-    TreeNode* root = (TreeNode*)malloc(sizeof(TreeNode));
-    root->value = postArray[postEnd];
-    root->left = root->right = NULL;
-
-    // Find the index of the root node in inorder array
-    int rootIndex;
-    for (rootIndex = inStart; rootIndex <= inEnd; rootIndex++) {
-        if (inArray[rootIndex] == root->value) {
-            break;
-        }
-    }
-
-    // Calculate the size of the left subtree
-    int leftSubtreeSize = rootIndex - inStart;
-
-    // Recursively build left and right subtrees
-    root->left = buildTreeHelper(inArray, postArray, inStart, rootIndex - 1, postStart, postStart + leftSubtreeSize - 1);
-    root->right = buildTreeHelper(inArray, postArray, rootIndex + 1, inEnd, postStart + leftSubtreeSize, postEnd - 1);
-
-    return root;
+// Helper function to create a new tree node
+TreeNode *newTreeNode(int data) {
+  TreeNode *newNode = malloc(sizeof(TreeNode));
+  if (newNode == NULL) {
+    fprintf(stderr, "Memory allocation failed\n");
+    exit(EXIT_FAILURE);
+  }
+  newNode->value = data;
+  newNode->left = newNode->right = NULL;
+  return newNode;
 }
 
-// Function to construct binary tree from inorder and postorder arrays
-Tree* buildTree(int* inArray, int* postArray, int size) {
-    if (inArray == NULL || postArray == NULL || size <= 0) {
-        return NULL;
-    }
-    Tree* tree = (Tree*)malloc(sizeof(Tree));
-    tree->root = buildTreeHelper(inArray, postArray, 0, size - 1, 0, size - 1);
-    return tree;
+// Helper function to search for an element in inArray within given range
+int search(int arr[], int strt, int end, int value) {
+  int i;
+  for (i = strt; i <= end; i++) {
+    if (arr[i] == value)
+      return i;
+  }
+  return -1;
+}
+
+// Helper function to construct the binary tree recursively
+TreeNode *buildUtil(int *inArray, int *postArray, int inStart, int inEnd, int *postIndex) {
+  if (inStart > inEnd)
+    return NULL;
+
+  TreeNode *root = newTreeNode(postArray[*postIndex]);
+  (*postIndex)--;
+
+  if (inStart == inEnd)
+    return root;
+
+  int inIndex = search(inArray, inStart, inEnd, root->value);
+
+  root->right = buildUtil(inArray, postArray, inIndex + 1, inEnd, postIndex);
+  root->left = buildUtil(inArray, postArray, inStart, inIndex - 1, postIndex);
+
+  return root;
+}
+
+/*
+buildTree:
+Given the infix (inArray), postfix (postArray), and size
+of a binary tree, construct a binary tree
+Note that this tree is not necessarily a binary search tree
+*/
+Tree *buildTree(int *inArray, int *postArray, int size)
+{
+  Tree *tree = newTree();
+  int postIndex = size - 1;
+  tree->root = buildUtil(inArray, postArray, 0, size - 1, &postIndex);
+  return tree;
+}
+
+// Helper function to print the path from a node to root
+bool printPathUtil(TreeNode *root, int val) {
+  if (root == NULL)
+    return false;
+
+  if (root->value == val || printPathUtil(root->left, val) || printPathUtil(root->right, val)) {
+    printf("%d\n", root->value);
+    return true;
+  }
+  return false;
+}
+
+/*
+printPath:
+Print the path from the desired node to the root, inclusive at both
+ends with the root being printed last
+*/
+void printPath(Tree *tr, int val)
+{
+  if (tr == NULL || tr->root == NULL) {
+    printf("No Path\n");
+    return;
+  }
+  if (!printPathUtil(tr->root, val))
+    printf("No Path\n");
+  else
+    printf("\n");
 }
