@@ -1,0 +1,1 @@
+The program is designed to read a maze from a file, find the shortest paths from a starting point within the maze using Breadth-First Search (BFS), and print the distances from the starting point to each cell.
