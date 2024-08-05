@@ -1,0 +1,3 @@
+The purpose of shuffling is to make the result difficult to predict. Riffle shuffling is one of the most widely used shuffling methods. Riffle shuffling has the following steps:
+
+Divide a deck of cards into two groups, called the left deck and right deck (because they are held by the left hand and the right hand). Each group has at least one card. The two groups may have different numbers of cards. This is one reason why the shuffling results is hard to predict.
